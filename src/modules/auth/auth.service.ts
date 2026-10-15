@@ -33,7 +33,7 @@ const toPublicUser = (user: HydratedDocument<IUser>): PublicUser => ({
 });
 
 const signToken = (userId: string): string =>
-  jwt.sign({ sub: userId }, env.JWT_SECRET, {
+  jwt.sign({ id: userId }, env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN as SignOptions["expiresIn"],
   });
 

@@ -5,6 +5,7 @@ import type {
   LoginInput,
   SignupInput,
 } from "../../validators/auth.validator.js";
+import User from "./user.model.js";
 
 export const signup = asyncHandler(async (req: Request, res: Response) => {
   const result = await authService.signup(req.body as SignupInput);
@@ -24,4 +25,16 @@ export const login = asyncHandler(async (req: Request, res: Response) => {
     message: "Logged in successfully",
     data: result,
   });
+});
+
+export const getMe = asyncHandler(async (req: Request, res: Response) => {
+  const user = req.user;
+
+  const userData = {
+    id: user?._id,
+    name: user.name,
+    email: user.email,
+  };
+
+  res.status(200).json({ success: true, data: userData });
 });

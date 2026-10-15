@@ -6,8 +6,9 @@ dotenv.config();
 
 const app = express();
 
-import errorMiddleware from "./middleware/errorMiddleware.js";
+import errorMiddleware from "./middleware/error.middleware.js";
 import authRoutes from "./modules/auth/auth.routes.js";
+import documentRoutes from "./modules/document/document.routes.js";
 
 app.use(helmet());
 app.use(cors());
@@ -22,6 +23,7 @@ app.get("/", (_req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/documents", documentRoutes);
 
 app.use((_req, res) => {
   res.status(404).json({
