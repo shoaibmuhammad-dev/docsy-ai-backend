@@ -1,6 +1,6 @@
 import type { Types } from "mongoose";
 import { chunkPages } from "./chunk.service.js";
-import { embedTexts } from "./embed.service.js";
+import { embedTexts } from "../../services/embed.service.js";
 import { extractPages } from "./pdf.service.js";
 import ApiError from "../../utils/ApiError.js";
 import Chunk from "../chunk/chunk.model.js";

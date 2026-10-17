@@ -1,6 +1,18 @@
 import "dotenv/config";
 import { z } from "zod";
 
+// Treat blank values in .env (e.g. "MAX_PDF_PAGES=") as "not set"
+const blankToUndefined = (value: unknown) => (value === "" ? undefined : value);
+
+const positiveNumber = (fallback: number) =>
+  z.preprocess(
+    blankToUndefined,
+    z.coerce.number().positive().default(fallback),
+  );
+
+const nonNegativeNumber = (fallback: number) =>
+  z.preprocess(blankToUndefined, z.coerce.number().min(0).default(fallback));
+
 const envSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
@@ -31,6 +43,12 @@ const envSchema = z.object({
   EMBEDDING_TOKENS_PER_MINUTE: z.coerce.number().default(25000),
 
   MAX_PDF_PAGES: z.coerce.number().default(100),
+
+  // Chat / RAG
+  // Chat / RAG
+  GEMINI_CHAT_MODEL: z.string().default("gemini-flash-latest"),
+  RAG_TOP_K: positiveNumber(6), // chunks retrieved per question
+  CHAT_HISTORY_MESSAGES: positiveNumber(6), // previous messages sent to the model
 });
 
 export const env = envSchema.parse(process.env);

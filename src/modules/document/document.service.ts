@@ -10,6 +10,8 @@ import ApiError from "../../utils/ApiError.js";
 import Chunk from "../chunk/chunk.model.js";
 import DocumentModel, { type IDocument } from "./document.model.js";
 import { ingestDocument } from "./ingestion.service.js";
+import Chat from "../chat/chat.model.js";
+import Message from "../message/message.model.js";
 
 type DocumentRecord = IDocument & {
   _id: Types.ObjectId;
@@ -161,4 +163,26 @@ export const removeDocument = async (
 
   // TODO (when chats exist): delete chats that reference this document, and
   // their messages.
+  await detachDocumentFromChats(userId, document._id);
+};
+
+export const detachDocumentFromChats = async (
+  userId: string,
+  documentId: Types.ObjectId,
+): Promise<void> => {
+  const owner = new Types.ObjectId(userId);
+
+  await Chat.updateMany(
+    { userId: owner, docIds: documentId },
+    { $pull: { docIds: documentId } },
+  );
+
+  const emptyChats = await Chat.find({ userId: owner, docIds: { $size: 0 } })
+    .select("_id")
+    .lean();
+  if (emptyChats.length === 0) return;
+
+  const chatIds = emptyChats.map((chat) => chat._id);
+  await Message.deleteMany({ chatId: { $in: chatIds } });
+  await Chat.deleteMany({ _id: { $in: chatIds } });
 };

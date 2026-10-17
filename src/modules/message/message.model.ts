@@ -4,8 +4,10 @@ export const MESSAGE_ROLES = ["user", "assistant"] as const;
 export type MessageRole = (typeof MESSAGE_ROLES)[number];
 
 export interface ICitation {
-  page: number;
+  index: number; // the [n] marker used inside the answer text
+  docId: Types.ObjectId;
   chunkId: Types.ObjectId;
+  page: number;
 }
 
 export interface IMessage {
@@ -17,15 +19,25 @@ export interface IMessage {
 
 const citationSchema = new Schema<ICitation>(
   {
-    page: {
+    index: {
       type: Number,
       required: true,
       min: 1,
+    },
+    docId: {
+      type: Schema.Types.ObjectId,
+      ref: "Document",
+      required: true,
     },
     chunkId: {
       type: Schema.Types.ObjectId,
       ref: "Chunk",
       required: true,
+    },
+    page: {
+      type: Number,
+      required: true,
+      min: 1,
     },
   },
   { _id: false },
