@@ -12,6 +12,7 @@ import {
   sendMessage,
 } from "./chat.controller.js";
 import authMiddleware from "../../middleware/auth.middleware.js";
+import userRateLimiter from "../../middleware/userRateLimiter.middleware.js";
 
 const router = express.Router();
 
@@ -22,6 +23,11 @@ router.post("/", validate(createChatSchema), createChat);
 router.get("/", getChats);
 router.get("/:id", getChat);
 router.delete("/:id", deleteChat);
-router.post("/:id/messages", validate(sendMessageSchema), sendMessage);
+router.post(
+  "/:id/messages",
+  validate(sendMessageSchema),
+  userRateLimiter,
+  sendMessage,
+);
 
 export default router;

@@ -1,28 +1,21 @@
 import { setTimeout as sleep } from "node:timers/promises";
 import { GoogleGenAI } from "@google/genai";
 import { env } from "../config/env.js";
-import ApiError from "../utils/ApiError.js";
+import { withRetry } from "../utils/retry.js";
 
 const ai = new GoogleGenAI({ apiKey: env.GEMINI_API_KEY });
 
 type EmbeddingTask = "RETRIEVAL_DOCUMENT" | "RETRIEVAL_QUERY";
 
 const BATCH_SIZE = 20;
-const MAX_ATTEMPTS = 5;
 const CHARS_PER_TOKEN = 4; // rough estimate, good enough for pacing
 
-const isRetryable = (error: unknown): boolean => {
-  const status = (error as { status?: number }).status;
-  return status === 429 || status === 500 || status === 503;
-};
-
-// Retries rate-limit / temporary errors with a growing delay (5s, 10s, 20s...)
-const embedBatch = async (
+const embedBatch = (
   texts: string[],
   taskType: EmbeddingTask,
-): Promise<number[][]> => {
-  for (let attempt = 1; ; attempt++) {
-    try {
+): Promise<number[][]> =>
+  withRetry(
+    async () => {
       const response = await ai.models.embedContent({
         model: env.EMBEDDING_MODEL,
         contents: texts,
@@ -42,24 +35,9 @@ const embedBatch = async (
       }
 
       return vectors as number[][];
-    } catch (error) {
-      if (!isRetryable(error)) throw error;
-
-      if (attempt >= MAX_ATTEMPTS) {
-        throw new ApiError(
-          "The AI service is busy right now. Please try again in a minute",
-          503,
-        );
-      }
-
-      const delayMs = 5000 * 2 ** (attempt - 1);
-      console.warn(
-        `[embed] rate limited or unavailable, retrying in ${delayMs / 1000}s (attempt ${attempt}/${MAX_ATTEMPTS})`,
-      );
-      await sleep(delayMs);
-    }
-  }
-};
+    },
+    { label: "embed" },
+  );
 
 export const embedTexts = async (
   texts: string[],
