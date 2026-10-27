@@ -5,7 +5,6 @@ import type {
   LoginInput,
   SignupInput,
 } from "../../validators/auth.validator.js";
-import User from "./user.model.js";
 
 export const signup = asyncHandler(async (req: Request, res: Response) => {
   const result = await authService.signup(req.body as SignupInput);

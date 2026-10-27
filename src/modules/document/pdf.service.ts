@@ -28,7 +28,7 @@ export const extractPages = async (buffer: Buffer): Promise<ExtractedPdf> => {
   // Check the size before doing the expensive extraction
   if (pdf.numPages > env.MAX_PDF_PAGES) {
     throw new ApiError(
-      `This PDF has ${pdf.numPages} pages. The maximum is ${env.MAX_PDF_PAGES}`,
+      `This PDF contains ${pdf.numPages} pages. You can upload PDFs with a maximum of ${env.MAX_PDF_PAGES} pages.`,
       422,
     );
   }

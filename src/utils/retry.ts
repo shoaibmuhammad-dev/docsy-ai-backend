@@ -52,7 +52,7 @@ export const withRetry = async <T>(
       if (signal?.aborted || !isRetryable(error)) throw error;
 
       if (attempt >= maxAttempts) {
-        logGeminiError(error);
+        // logGeminiError(error);
         throw new ApiError(
           isNetworkError(error)
             ? "Could not reach the AI service. Check your internet connection and try again"

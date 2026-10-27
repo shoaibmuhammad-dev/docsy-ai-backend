@@ -8,13 +8,17 @@ import {
   getDocumentUrl,
   uploadDocument,
 } from "./document.controller.js";
+import {
+  apiLimiter,
+  uploadLimiter,
+} from "../../middleware/rateLimit.middleware.js";
 
 const router = express.Router();
 
 // Every document route requires a logged-in user
-router.use(authMiddleware);
+router.use(authMiddleware, apiLimiter);
 
-router.post("/", upload.single("file"), uploadDocument);
+router.post("/", uploadLimiter, upload.single("file"), uploadDocument);
 router.get("/", getDocuments);
 router.get("/:id", getDocument);
 router.get("/:id/url", getDocumentUrl);

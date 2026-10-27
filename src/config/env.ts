@@ -49,6 +49,22 @@ const envSchema = z.object({
   GEMINI_CHAT_MODEL: z.string().default("gemini-flash-latest"),
   RAG_TOP_K: positiveNumber(6), // chunks retrieved per question
   CHAT_HISTORY_MESSAGES: positiveNumber(6), // previous messages sent to the model
+
+  // Security
+  CORS_ORIGINS: z.string().default("http://localhost:3000"), // comma-separated browser origins
+  TRUST_PROXY: z.preprocess(
+    blankToUndefined,
+    z.coerce.number().int().min(0).default(0),
+  ),
+
+  // Rate limits
+  RATE_LIMIT_LOGIN_ATTEMPTS: positiveNumber(10), // failed logins per email per 15 min
+  RATE_LIMIT_SIGNUPS_PER_HOUR: positiveNumber(20),
+  RATE_LIMIT_UPLOADS_PER_HOUR: positiveNumber(10), // per user
+  RATE_LIMIT_CHAT_PER_MINUTE: positiveNumber(8), // per user
+  RATE_LIMIT_CHAT_PER_DAY: positiveNumber(100), // per user
+  RATE_LIMIT_GLOBAL_CHAT_PER_MINUTE: positiveNumber(20), // all users together
+  RATE_LIMIT_API_PER_MINUTE: positiveNumber(120), // per user, every authenticated route
 });
 
 export const env = envSchema.parse(process.env);

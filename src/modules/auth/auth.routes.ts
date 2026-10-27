@@ -3,12 +3,17 @@ import { getMe, login, signup } from "./auth.controller.js";
 import { validate } from "../../middleware/validate.middleware.js";
 import { loginSchema, signupSchema } from "../../validators/auth.validator.js";
 import authMiddleware from "../../middleware/auth.middleware.js";
+import {
+  apiLimiter,
+  loginLimiter,
+  signupLimiter,
+} from "../../middleware/rateLimit.middleware.js";
 
 const router = Router();
 
-router.post("/signup", validate(signupSchema), signup);
-router.post("/login", validate(loginSchema), login);
+router.post("/signup", validate(signupSchema), signupLimiter, signup);
+router.post("/login", validate(loginSchema), loginLimiter, login);
 
-router.get("/me", authMiddleware, getMe);
+router.get("/me", authMiddleware, apiLimiter, getMe);
 
 export default router;
