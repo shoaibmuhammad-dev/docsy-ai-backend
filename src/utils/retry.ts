@@ -52,6 +52,7 @@ export const withRetry = async <T>(
       if (signal?.aborted || !isRetryable(error)) throw error;
 
       if (attempt >= maxAttempts) {
+        logGeminiError(error);
         throw new ApiError(
           isNetworkError(error)
             ? "Could not reach the AI service. Check your internet connection and try again"
@@ -68,3 +69,16 @@ export const withRetry = async <T>(
     }
   }
 };
+
+function logGeminiError(error: unknown) {
+  if (error instanceof Error) {
+    console.error("[Gemini] Request failed:", {
+      name: error.name,
+      message: error.message,
+      status: (error as Error & { status?: number }).status,
+      cause: error.cause,
+    });
+  } else {
+    console.error("[Gemini] Request failed:", error);
+  }
+}
