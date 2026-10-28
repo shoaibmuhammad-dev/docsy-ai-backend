@@ -69,11 +69,13 @@ export const createDocument = async (
   const signature = file.buffer
     .subarray(0, PDF_SIGNATURE.length)
     .toString("latin1");
+
   if (signature !== PDF_SIGNATURE) {
     throw new ApiError("The uploaded file is not a valid PDF", 400);
   }
 
   const documentCount = await DocumentModel.countDocuments({ userId });
+
   if (documentCount >= env.MAX_DOCUMENTS_PER_USER) {
     throw new ApiError(
       `Document limit reached (${env.MAX_DOCUMENTS_PER_USER}). Delete a document to upload a new one`,

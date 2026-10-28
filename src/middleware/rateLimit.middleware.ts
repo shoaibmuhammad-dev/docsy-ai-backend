@@ -22,6 +22,44 @@ const emailKey = (req: Request) => {
     : clientKey(req);
 };
 
+const GENERIC_MESSAGE =
+  "If an account exists with this email, we've sent a password reset link.";
+
+const normalizedEmailKey = (req: Request): string => {
+  const email = req.body?.email;
+
+  return typeof email === "string"
+    ? email.trim().toLowerCase()
+    : "invalid-email";
+};
+
+export const passwordResetIpLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.status(429).json({
+      success: false,
+      error: "Too many requests. Please try again later.",
+    });
+  },
+});
+
+export const passwordResetEmailLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+  keyGenerator: normalizedEmailKey,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  handler: (_req, res) => {
+    res.status(200).json({
+      success: true,
+      message: GENERIC_MESSAGE,
+    });
+  },
+});
+
 // A rejected request goes through your normal error middleware, so it looks
 // like every other error: { success: false, error: "..." } with status 429
 const reject =

@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import type { JwtPayload } from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 import User from "../modules/auth/user.model.js";
 import { env } from "../config/env.js";
@@ -39,7 +40,28 @@ const authMiddleware = async (
       return;
     }
 
+    const payload = decoded as JwtPayload;
     const user = await User.findById(decoded.id).select("-password");
+
+    if (!payload.iat) {
+      // Reject tokens without a valid issued-at timestamp.
+      res.status(401).json({
+        success: false,
+        error: "Invalid authentication token",
+      });
+      return;
+    }
+
+    if (
+      user.passwordChangedAt &&
+      payload.iat < user.passwordChangedAt.getTime() / 1000
+    ) {
+      res.status(401).json({
+        success: false,
+        error: "Your password has changed. Please sign in again.",
+      });
+      return;
+    }
 
     if (!user) {
       res.status(401).json({

@@ -21,7 +21,7 @@ export const SYSTEM_INSTRUCTION = `You are a helpful assistant that answers ques
 
 Answer style:
 - Start with a direct answer in a complete sentence, then add supporting detail.
-- Write in clear, natural prose. Use bullet points only for real lists of three or more items, and make each bullet a complete thought that makes sense on its own (who, what, when).
+- Write in clear, natural prose. Use bullet points only for real lists of three or more items, and make each bullet a complete thought that makes sense on its own (who, what, when, how).
 - Use names, roles, dates and numbers exactly as they appear in the excerpts.
 - For follow-up questions like "the second one" or "that project", say explicitly what you are referring to (for example "At Acme Corp, ...").
 - No filler such as "Based on the document" and don't repeat the question.

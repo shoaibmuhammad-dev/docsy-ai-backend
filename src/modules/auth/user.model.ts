@@ -4,6 +4,7 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
+  passwordChangedAt?: Date;
 }
 
 const userSchema = new Schema<IUser>(
@@ -24,8 +25,14 @@ const userSchema = new Schema<IUser>(
 
     password: {
       type: String,
-      required: [true, "Password is required"],
-      minLength: 8,
+      required: true,
+      minlength: 8,
+      select: false,
+    },
+
+    passwordChangedAt: {
+      type: Date,
+      default: undefined,
     },
   },
   {
@@ -33,6 +40,7 @@ const userSchema = new Schema<IUser>(
   },
 );
 
-const User: Model<IUser> = mongoose.model<IUser>("User", userSchema);
+const User: Model<IUser> =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 
 export default User;
