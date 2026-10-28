@@ -12,13 +12,14 @@ if (!emailFrom) {
 }
 
 const resend = new Resend(apiKey);
+const senderEmail: string = emailFrom;
 
 export async function sendPasswordResetEmail(
   email: string,
   resetUrl: string,
 ): Promise<void> {
   const { error } = await resend.emails.send({
-    from: emailFrom,
+    from: senderEmail,
     to: email,
     subject: "Reset your Chat With PDF password",
     text: [

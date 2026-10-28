@@ -43,8 +43,15 @@ const authMiddleware = async (
     const payload = decoded as JwtPayload;
     const user = await User.findById(decoded.id).select("-password");
 
-    if (!payload.iat) {
-      // Reject tokens without a valid issued-at timestamp.
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        error: "User associated with this token no longer exists",
+      });
+      return;
+    }
+
+    if (typeof payload.iat !== "number") {
       res.status(401).json({
         success: false,
         error: "Invalid authentication token",
@@ -54,19 +61,11 @@ const authMiddleware = async (
 
     if (
       user.passwordChangedAt &&
-      payload.iat < user.passwordChangedAt.getTime() / 1000
+      payload.iat <= Math.floor(user.passwordChangedAt.getTime() / 1000)
     ) {
       res.status(401).json({
         success: false,
         error: "Your password has changed. Please sign in again.",
-      });
-      return;
-    }
-
-    if (!user) {
-      res.status(401).json({
-        success: false,
-        error: "User associated with this token no longer exists",
       });
       return;
     }
